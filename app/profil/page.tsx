@@ -96,12 +96,14 @@ export default async function ProfilePage() {
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Trophy className="h-4 w-4" />
-                      <span>{profile?.points} puan</span>
+                      <span>{profile?.points || 0} puan</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>Katılım: {format(new Date(profile?.created_at || ""), "MMMM yyyy", { locale: tr })}</span>
-                    </div>
+                    {profile?.created_at && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>Katılım: {format(new Date(profile.created_at), "MM yyyy", { locale: tr })}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <Button variant="outline" asChild>
