@@ -1,22 +1,18 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { NewEventForm } from "@/components/new-event-form"
 
 export default async function NewEventPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-  if (!profile?.is_admin) {
+  if (!user.isAdmin) {
     redirect("/")
   }
 

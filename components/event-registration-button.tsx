@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -29,24 +28,16 @@ export function EventRegistrationButton({
   const [status, setStatus] = useState(registrationStatus)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
   async function handleRegister() {
     setIsLoading(true)
-    const { error } = await supabase.from("event_registrations").insert({
-      event_id: eventId,
-      user_id: userId,
-      status: "registered",
-    })
+    try {
+      const res = await fetch(`/api/events/${eventId}/register`, { method: "POST" })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Kayıt oluşturulamadı")
+      }
 
-    if (error) {
-      console.error("[v0] Error registering for event:", error)
-      toast({
-        title: "Hata",
-        description: error.message || "Kayıt oluşturulamadı",
-        variant: "destructive",
-      })
-    } else {
       setRegistered(true)
       setStatus("registered")
       toast({
@@ -54,22 +45,26 @@ export function EventRegistrationButton({
         description: "Etkinliğe başarıyla kayıt oldunuz",
       })
       router.refresh()
+    } catch (error: unknown) {
+      console.error("[v0] Error registering for event:", error)
+      toast({
+        title: "Hata",
+        description: error instanceof Error ? error.message : "Kayıt oluşturulamadı",
+        variant: "destructive",
+      })
     }
     setIsLoading(false)
   }
 
   async function handleCancel() {
     setIsLoading(true)
-    const { error } = await supabase.from("event_registrations").delete().eq("event_id", eventId).eq("user_id", userId)
+    try {
+      const res = await fetch(`/api/events/${eventId}/register`, { method: "DELETE" })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Kayıt iptal edilemedi")
+      }
 
-    if (error) {
-      console.error("[v0] Error canceling registration:", error)
-      toast({
-        title: "Hata",
-        description: "Kayıt iptal edilemedi",
-        variant: "destructive",
-      })
-    } else {
       setRegistered(false)
       setStatus(undefined)
       toast({
@@ -77,6 +72,13 @@ export function EventRegistrationButton({
         description: "Kaydınız iptal edildi",
       })
       router.refresh()
+    } catch (error: unknown) {
+      console.error("[v0] Error canceling registration:", error)
+      toast({
+        title: "Hata",
+        description: "Kayıt iptal edilemedi",
+        variant: "destructive",
+      })
     }
     setIsLoading(false)
   }

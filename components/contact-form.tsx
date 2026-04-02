@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,28 +17,22 @@ export function ContactForm() {
   const [message, setMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
 
-    const { error } = await supabase.from("contact_submissions").insert({
-      name,
-      email,
-      subject,
-      message,
-      status: "new",
-    })
-
-    if (error) {
-      console.error("[v0] Error submitting contact form:", error)
-      toast({
-        title: "Hata",
-        description: "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
-        variant: "destructive",
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, subject, message }),
       })
-    } else {
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Mesaj gönderilemedi")
+      }
+
       toast({
         title: "Başarılı",
         description: "Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.",
@@ -48,6 +41,13 @@ export function ContactForm() {
       setEmail("")
       setSubject("")
       setMessage("")
+    } catch (error: unknown) {
+      console.error("[v0] Error submitting contact form:", error)
+      toast({
+        title: "Hata",
+        description: "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
+        variant: "destructive",
+      })
     }
     setIsSubmitting(false)
   }

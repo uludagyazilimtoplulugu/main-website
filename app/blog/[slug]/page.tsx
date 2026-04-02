@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
@@ -11,33 +12,35 @@ import { Eye, Calendar } from "lucide-react"
 import { BlogComments } from "@/components/blog-comments"
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const supabase = await createClient()
+  const session = await auth()
+  const user = session?.user ?? null
   const { slug } = await params
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   // Fetch post
-  const { data: post } = await supabase
-    .from("blog_posts")
-    .select(
-      `
-      *,
-      author:profiles(id, full_name, display_name, avatar_url, level, points),
-      category:blog_categories(id, name, slug, color)
-    `,
-    )
-    .eq("slug", slug)
-    .eq("published", true)
-    .single()
+  const post = await prisma.blogPost.findFirst({
+    where: {
+      slug,
+      published: true,
+    },
+    include: {
+      author: {
+        select: { id: true, fullName: true, displayName: true, avatarUrl: true, level: true, points: true },
+      },
+      category: {
+        select: { id: true, name: true, slug: true, color: true },
+      },
+    },
+  })
 
   if (!post) {
     notFound()
   }
 
   // Increment views
-  await supabase.rpc("increment_post_views", { p_post_id: post.id })
+  await prisma.blogPost.update({
+    where: { id: post.id },
+    data: { views: { increment: 1 } },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,7 +50,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {/* Post Header */}
           <div className="mb-8">
             {post.category && (
-              <Badge className="mb-4" style={{ backgroundColor: post.category.color }}>
+              <Badge className="mb-4" style={{ backgroundColor: post.category.color ?? undefined }}>
                 {post.category.name}
               </Badge>
             )}
@@ -59,35 +62,35 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
-                <AvatarFallback>{post.author?.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
+                <AvatarImage src={post.author?.avatarUrl || "/placeholder.svg"} />
+                <AvatarFallback>{post.author?.displayName?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold text-foreground">{post.author?.display_name}</p>
+                <p className="font-semibold text-foreground">{post.author?.displayName}</p>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    <span>{format(new Date(post.created_at), "d MMMM yyyy", { locale: tr })}</span>
+                    <span>{format(new Date(post.createdAt), "d MMMM yyyy", { locale: tr })}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Eye className="h-3 w-3" />
-                    <span>{post.views} görüntülenme</span>
+                    <span>{post.views} goruntulenme</span>
                   </div>
                 </div>
               </div>
             </div>
             <div className="text-sm text-muted-foreground">
               <Badge variant="outline">
-                Seviye {post.author?.level} • {post.author?.points} puan
+                Seviye {post.author?.level} - {post.author?.points} puan
               </Badge>
             </div>
           </div>
 
           {/* Cover Image */}
-          {post.cover_image && (
+          {post.coverImage && (
             <div className="mb-8 aspect-video overflow-hidden rounded-lg">
               <img
-                src={post.cover_image || "/placeholder.svg"}
+                src={post.coverImage || "/placeholder.svg"}
                 alt={post.title}
                 className="h-full w-full object-cover"
               />

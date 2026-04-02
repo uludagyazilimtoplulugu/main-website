@@ -1,20 +1,21 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { EditProfileForm } from "@/components/edit-profile-form"
 
 export default async function EditProfilePage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+  const profile = await prisma.user.findUnique({
+    where: { id: user.id },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">

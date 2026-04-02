@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,38 +12,31 @@ import { tr } from "date-fns/locale"
 import { Calendar, MapPin, Users } from "lucide-react"
 
 export default async function EventsPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  let isAdmin = false
-  if (user) {
-    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-    isAdmin = profile?.is_admin === true
-  }
+  const session = await auth()
+  const user = session?.user ?? null
+  const isAdmin = user?.isAdmin === true
 
   // Fetch published events
-  const { data: events } = await supabase
-    .from("events")
-    .select(
-      `
-      *,
-      organizer:profiles(id, display_name, avatar_url),
-      registrations:event_registrations(count)
-    `,
-    )
-    .eq("published", true)
-    .order("event_date", { ascending: true })
+  const events = await prisma.event.findMany({
+    where: { published: true },
+    include: {
+      organizer: {
+        select: { id: true, displayName: true, avatarUrl: true },
+      },
+      _count: {
+        select: { registrations: true },
+      },
+    },
+    orderBy: { eventDate: "asc" },
+  })
 
   const now = new Date()
-  const upcomingEvents = events?.filter((event) => isAfter(new Date(event.event_date), now))
-  const pastEvents = events?.filter((event) => isBefore(new Date(event.event_date), now))
+  const upcomingEvents = events.filter((event) => isAfter(new Date(event.eventDate), now))
+  const pastEvents = events.filter((event) => isBefore(new Date(event.eventDate), now))
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader user={user} isAdmin={isAdmin} />
+      <SiteHeader user={user} />
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
           <div className="flex items-center justify-between mb-8 animate-fade-in-up">
@@ -63,20 +57,20 @@ export default async function EventsPage() {
               <h2 className="text-2xl font-bold mb-6 text-foreground animate-fade-in-up">Yaklaşan Etkinlikler</h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {upcomingEvents.map((event, index) => {
-                  const registrationCount = event.registrations?.[0]?.count || 0
-                  const isFull = event.max_participants && registrationCount >= event.max_participants
+                  const registrationCount = event._count.registrations
+                  const isFull = event.maxParticipants && registrationCount >= event.maxParticipants
                   const registrationClosed =
-                    event.registration_deadline && isAfter(now, new Date(event.registration_deadline))
+                    event.registrationDeadline && isAfter(now, new Date(event.registrationDeadline))
 
                   return (
                     <Link key={event.id} href={`/etkinlikler/${event.slug}`}>
                       <Card
                         className={`h-full hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-scale-in stagger-${(index % 6) + 1}`}
                       >
-                        {event.cover_image && (
+                        {event.coverImage && (
                           <div className="aspect-video overflow-hidden rounded-t-lg">
                             <img
-                              src={event.cover_image || "/placeholder.svg"}
+                              src={event.coverImage || "/placeholder.svg"}
                               alt={event.title}
                               className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
                             />
@@ -96,28 +90,28 @@ export default async function EventsPage() {
                         <CardContent className="space-y-3">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            <span>{format(new Date(event.event_date), "d MMMM yyyy, HH:mm", { locale: tr })}</span>
+                            <span>{format(new Date(event.eventDate), "d MMMM yyyy, HH:mm", { locale: tr })}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-4 w-4" />
                             <span className="line-clamp-1">{event.location}</span>
                           </div>
-                          {event.max_participants && (
+                          {event.maxParticipants && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Users className="h-4 w-4" />
                               <span>
-                                {registrationCount}/{event.max_participants} katılımcı
+                                {registrationCount}/{event.maxParticipants} katılımcı
                               </span>
                             </div>
                           )}
                           <div className="flex items-center gap-2 pt-2">
                             <Avatar className="h-6 w-6">
-                              <AvatarImage src={event.organizer?.avatar_url || "/placeholder.svg"} />
+                              <AvatarImage src={event.organizer?.avatarUrl || "/placeholder.svg"} />
                               <AvatarFallback>
-                                {event.organizer?.display_name?.charAt(0).toUpperCase() || "?"}
+                                {event.organizer?.displayName?.charAt(0).toUpperCase() || "?"}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-xs text-muted-foreground">{event.organizer?.display_name}</span>
+                            <span className="text-xs text-muted-foreground">{event.organizer?.displayName}</span>
                           </div>
                         </CardContent>
                       </Card>
@@ -138,10 +132,10 @@ export default async function EventsPage() {
                     <Card
                       className={`h-full opacity-75 hover:opacity-100 hover:shadow-lg transition-all duration-300 animate-fade-in stagger-${(index % 6) + 1}`}
                     >
-                      {event.cover_image && (
+                      {event.coverImage && (
                         <div className="aspect-video overflow-hidden rounded-t-lg">
                           <img
-                            src={event.cover_image || "/placeholder.svg"}
+                            src={event.coverImage || "/placeholder.svg"}
                             alt={event.title}
                             className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
                           />
@@ -156,7 +150,7 @@ export default async function EventsPage() {
                       <CardContent>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>{format(new Date(event.event_date), "d MMMM yyyy", { locale: tr })}</span>
+                          <span>{format(new Date(event.eventDate), "d MMMM yyyy", { locale: tr })}</span>
                         </div>
                       </CardContent>
                     </Card>

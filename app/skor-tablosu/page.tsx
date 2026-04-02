@@ -1,24 +1,22 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Medal, Award } from "lucide-react"
 
 export default async function LeaderboardPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   // Fetch top users by points
-  const { data: topUsers } = await supabase
-    .from("profiles")
-    .select("id, display_name, full_name, avatar_url, points, level")
-    .order("points", { ascending: false })
-    .limit(50)
+  const topUsers = await prisma.user.findMany({
+    select: { id: true, displayName: true, fullName: true, avatarUrl: true, points: true, level: true },
+    orderBy: { points: "desc" },
+    take: 50,
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -52,11 +50,11 @@ export default async function LeaderboardPage() {
                           )}
                         </div>
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={profile.avatar_url || "/placeholder.svg"} />
-                          <AvatarFallback>{profile.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
+                          <AvatarImage src={profile.avatarUrl || "/placeholder.svg"} />
+                          <AvatarFallback>{profile.displayName?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-semibold text-foreground">{profile.display_name}</p>
+                          <p className="font-semibold text-foreground">{profile.displayName}</p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Badge variant="outline">Seviye {profile.level}</Badge>
                           </div>

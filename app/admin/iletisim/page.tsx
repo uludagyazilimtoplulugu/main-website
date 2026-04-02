@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,25 +12,20 @@ import { tr } from "date-fns/locale"
 import { ArrowLeft, Mail } from "lucide-react"
 
 export default async function AdminContactPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-  if (!profile?.is_admin) {
+  if (!user.isAdmin) {
     redirect("/")
   }
 
-  const { data: submissions } = await supabase
-    .from("contact_submissions")
-    .select("*")
-    .order("created_at", { ascending: false })
+  const submissions = await prisma.contactSubmission.findMany({
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -70,7 +66,7 @@ export default async function AdminContactPage() {
                           <p>
                             {submission.name} - {submission.email}
                           </p>
-                          <p>{format(new Date(submission.created_at), "d MMMM yyyy, HH:mm", { locale: tr })}</p>
+                          <p>{format(new Date(submission.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}</p>
                         </div>
                       </div>
                     </div>

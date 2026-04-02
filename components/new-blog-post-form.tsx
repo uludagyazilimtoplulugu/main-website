@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,7 +31,6 @@ export function NewBlogPostForm({ categories, userId }: { categories: Category[]
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -54,34 +52,30 @@ export function NewBlogPostForm({ categories, userId }: { categories: Category[]
     e.preventDefault()
     setIsSubmitting(true)
 
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .insert({
-        title,
-        slug,
-        excerpt: excerpt || null,
-        content,
-        cover_image: coverImage || null,
-        author_id: userId,
-        category_id: categoryId || null,
-        published,
+    try {
+      const res = await fetch("/api/blog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, slug, excerpt: excerpt || null, content, coverImage: coverImage || null, categoryId: categoryId || null, published }),
       })
-      .select()
-      .single()
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Blog yazısı oluşturulamadı")
+      }
+      const data = await res.json()
 
-    if (error) {
-      console.error("[v0] Error creating post:", error)
-      toast({
-        title: "Hata",
-        description: error.message || "Blog yazısı oluşturulamadı",
-        variant: "destructive",
-      })
-    } else {
       toast({
         title: "Başarılı",
         description: "Blog yazısı oluşturuldu",
       })
       router.push(`/blog/${data.slug}`)
+    } catch (error: unknown) {
+      console.error("[v0] Error creating post:", error)
+      toast({
+        title: "Hata",
+        description: error instanceof Error ? error.message : "Blog yazısı oluşturulamadı",
+        variant: "destructive",
+      })
     }
     setIsSubmitting(false)
   }

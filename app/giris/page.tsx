@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { createClient } from "@/lib/supabase/client"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -23,13 +23,13 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) throw error
-      window.location.href = "/"
+      const result = await signIn("credentials", { email, password, redirect: false })
+      if (result?.error) {
+        setError("E-posta veya şifre hatalı")
+        setIsLoading(false)
+      } else {
+        window.location.href = "/"
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Bir hata oluştu")
       setIsLoading(false)

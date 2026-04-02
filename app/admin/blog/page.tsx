@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,31 +12,28 @@ import { tr } from "date-fns/locale"
 import { ArrowLeft, Eye } from "lucide-react"
 
 export default async function AdminBlogPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-  if (!profile?.is_admin) {
+  if (!user.isAdmin) {
     redirect("/")
   }
 
-  const { data: posts } = await supabase
-    .from("blog_posts")
-    .select(
-      `
-      *,
-      author:profiles(display_name),
-      category:blog_categories(name)
-    `,
-    )
-    .order("created_at", { ascending: false })
+  const posts = await prisma.blogPost.findMany({
+    include: {
+      author: {
+        select: { displayName: true },
+      },
+      category: {
+        select: { name: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -73,9 +71,9 @@ export default async function AdminBlogPage() {
                         {post.category && <Badge variant="outline">{post.category.name}</Badge>}
                       </div>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <span>{post.author?.display_name}</span>
+                        <span>{post.author?.displayName}</span>
                         <span>•</span>
-                        <span>{format(new Date(post.created_at), "d MMM yyyy", { locale: tr })}</span>
+                        <span>{format(new Date(post.createdAt), "d MMM yyyy", { locale: tr })}</span>
                         <span>•</span>
                         <div className="flex items-center gap-1">
                           <Eye className="h-3 w-3" />

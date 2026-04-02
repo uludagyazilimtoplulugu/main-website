@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,6 +26,7 @@ type Comment = {
 type User = {
   id: string
   email: string
+  name: string
 } | null
 
 export function BlogComments({ postId, user }: { postId: string; user: User }) {
@@ -35,7 +35,6 @@ export function BlogComments({ postId, user }: { postId: string; user: User }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const supabase = createClient()
 
   useEffect(() => {
     loadComments()
@@ -43,28 +42,20 @@ export function BlogComments({ postId, user }: { postId: string; user: User }) {
 
   async function loadComments() {
     setIsLoading(true)
-    const { data, error } = await supabase
-      .from("blog_comments")
-      .select(
-        `
-        id,
-        content,
-        created_at,
-        author:profiles(id, display_name, avatar_url)
-      `,
-      )
-      .eq("post_id", postId)
-      .order("created_at", { ascending: false })
-
-    if (error) {
+    try {
+      const res = await fetch(`/api/blog/${postId}/comments`)
+      if (!res.ok) {
+        throw new Error("Yorumlar yüklenemedi")
+      }
+      const data = await res.json()
+      setComments(data)
+    } catch (error: unknown) {
       console.error("[v0] Error loading comments:", error)
       toast({
         title: "Hata",
         description: "Yorumlar yüklenemedi",
         variant: "destructive",
       })
-    } else {
-      setComments(data || [])
     }
     setIsLoading(false)
   }
@@ -74,45 +65,55 @@ export function BlogComments({ postId, user }: { postId: string; user: User }) {
     if (!user || !newComment.trim()) return
 
     setIsSubmitting(true)
-    const { error } = await supabase.from("blog_comments").insert({
-      post_id: postId,
-      author_id: user.id,
-      content: newComment.trim(),
-    })
-
-    if (error) {
-      console.error("[v0] Error submitting comment:", error)
-      toast({
-        title: "Hata",
-        description: "Yorum gönderilemedi",
-        variant: "destructive",
+    try {
+      const res = await fetch(`/api/blog/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newComment.trim() }),
       })
-    } else {
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Yorum gönderilemedi")
+      }
+
       setNewComment("")
       loadComments()
       toast({
         title: "Başarılı",
         description: "Yorumunuz gönderildi",
       })
+    } catch (error: unknown) {
+      console.error("[v0] Error submitting comment:", error)
+      toast({
+        title: "Hata",
+        description: "Yorum gönderilemedi",
+        variant: "destructive",
+      })
     }
     setIsSubmitting(false)
   }
 
   async function handleDeleteComment(commentId: string) {
-    const { error } = await supabase.from("blog_comments").delete().eq("id", commentId)
+    try {
+      const res = await fetch(`/api/blog/${postId}/comments?commentId=${commentId}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Yorum silinemedi")
+      }
 
-    if (error) {
+      loadComments()
+      toast({
+        title: "Başarılı",
+        description: "Yorum silindi",
+      })
+    } catch (error: unknown) {
       console.error("[v0] Error deleting comment:", error)
       toast({
         title: "Hata",
         description: "Yorum silinemedi",
         variant: "destructive",
-      })
-    } else {
-      loadComments()
-      toast({
-        title: "Başarılı",
-        description: "Yorum silindi",
       })
     }
   }

@@ -1,16 +1,14 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
 import { Card, CardContent } from "@/components/ui/card"
-import { Users, Target, Heart, Lightbulb, Award, Github, Linkedin, Mail } from "lucide-react"
+import { Users, Target, Heart, Lightbulb, Github, Linkedin, Mail } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export default async function AboutPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -115,37 +113,14 @@ export default async function AboutPage() {
             </div>
           </div>
 
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-center">Yönetim Ekibi</h2>
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card className="border-primary/50">
-                <CardContent className="pt-6">
-                  <Award className="h-10 w-10 text-primary mb-4" />
-                  <h3 className="text-xl font-bold mb-2">Mevcut Başkan</h3>
-                  <div className="space-y-2">
-                    <p className="font-semibold text-foreground">Ahmet Yılmaz</p>
-                    <p className="text-sm text-muted-foreground">Bilgisayar Mühendisliği - 3. Sınıf</p>
-                    <p className="text-sm text-muted-foreground">Görev Süresi: 2024 - Devam Ediyor</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <Users className="h-10 w-10 text-primary mb-4" />
-                  <h3 className="text-xl font-bold mb-4">Eski Başkanlar</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="font-semibold text-foreground">Ayşe Demir</p>
-                      <p className="text-sm text-muted-foreground">2022 - 2024</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">Mehmet Kaya</p>
-                      <p className="text-sm text-muted-foreground">2020 - 2022</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <div className="mb-16 text-center">
+            <h2 className="text-3xl font-bold mb-4">Yönetim Ekibi</h2>
+            <p className="text-muted-foreground mb-6">
+              Toplulugumuzun yönetim kadrosunu ve gecmis dönem yöneticilerini görüntüleyin.
+            </p>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/yonetim-kurulu">Yönetim Kurulunu Görüntüle</Link>
+            </Button>
           </div>
 
           <div className="mb-16">

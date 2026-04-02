@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,34 +9,31 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
-import { ArrowLeft, Users } from "lucide-react"
+import { ArrowLeft, Users, QrCode } from "lucide-react"
 
 export default async function AdminEventsPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-  if (!profile?.is_admin) {
+  if (!user.isAdmin) {
     redirect("/")
   }
 
-  const { data: events } = await supabase
-    .from("events")
-    .select(
-      `
-      *,
-      organizer:profiles(display_name),
-      registrations:event_registrations(count)
-    `,
-    )
-    .order("event_date", { ascending: false })
+  const events = await prisma.event.findMany({
+    include: {
+      organizer: {
+        select: { displayName: true },
+      },
+      _count: {
+        select: { registrations: true },
+      },
+    },
+    orderBy: { eventDate: "desc" },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -75,16 +73,22 @@ export default async function AdminEventsPage() {
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <span>{event.organizer?.display_name}</span>
+                        <span>{event.organizer?.displayName}</span>
                         <span>•</span>
-                        <span>{format(new Date(event.event_date), "d MMM yyyy, HH:mm", { locale: tr })}</span>
+                        <span>{format(new Date(event.eventDate), "d MMM yyyy, HH:mm", { locale: tr })}</span>
                         <span>•</span>
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
-                          <span>{event.registrations?.[0]?.count || 0} katılımcı</span>
+                          <span>{event._count.registrations} katılımcı</span>
                         </div>
                       </div>
                     </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/admin/etkinlikler/${event.id}/qr`}>
+                        <QrCode className="h-4 w-4 mr-1" />
+                        QR
+                      </Link>
+                    </Button>
                   </div>
                 ))}
               </div>

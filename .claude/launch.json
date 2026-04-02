@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "uludag-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "3500"],
+      "cwd": "C:\\Users\\HP\\Desktop\\uludag-yazilim-website",
+      "port": 3500
+    }
+  ]
+}

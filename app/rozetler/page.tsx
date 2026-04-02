@@ -1,24 +1,27 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 export default async function BadgesPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   // Fetch all badges
-  const { data: badges } = await supabase.from("badges").select("*").order("points_required")
+  const badges = await prisma.badge.findMany({
+    orderBy: { pointsRequired: "asc" },
+  })
 
   // Fetch user badges if logged in
   let userBadges: string[] = []
   if (user) {
-    const { data } = await supabase.from("user_badges").select("badge_id").eq("user_id", user.id)
-    userBadges = data?.map((ub) => ub.badge_id) || []
+    const data = await prisma.userBadge.findMany({
+      where: { userId: user.id },
+      select: { badgeId: true },
+    })
+    userBadges = data.map((ub) => ub.badgeId)
   }
 
   return (
@@ -48,8 +51,8 @@ export default async function BadgesPage() {
                       <CardDescription>{badge.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {badge.points_required > 0 && (
-                        <div className="text-sm text-muted-foreground">Gereken puan: {badge.points_required}</div>
+                      {badge.pointsRequired > 0 && (
+                        <div className="text-sm text-muted-foreground">Gereken puan: {badge.pointsRequired}</div>
                       )}
                     </CardContent>
                   </Card>

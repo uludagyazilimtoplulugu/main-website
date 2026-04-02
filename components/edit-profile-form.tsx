@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,50 +14,49 @@ import { Loader2 } from "lucide-react"
 
 type Profile = {
   id: string
-  full_name: string
-  display_name: string
+  fullName: string
+  displayName: string
   bio: string | null
-  avatar_url: string | null
+  avatarUrl: string | null
 }
 
 export function EditProfileForm({ profile }: { profile: Profile | null }) {
-  const [fullName, setFullName] = useState(profile?.full_name || "")
-  const [displayName, setDisplayName] = useState(profile?.display_name || "")
+  const [fullName, setFullName] = useState(profile?.fullName || "")
+  const [displayName, setDisplayName] = useState(profile?.displayName || "")
   const [bio, setBio] = useState(profile?.bio || "")
-  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "")
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatarUrl || "")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: fullName,
-        display_name: displayName,
-        bio: bio || null,
-        avatar_url: avatarUrl || null,
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, displayName, bio: bio || null, avatarUrl: avatarUrl || null }),
       })
-      .eq("id", profile?.id)
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Profil güncellenemedi")
+      }
 
-    if (error) {
-      console.error("[v0] Error updating profile:", error)
-      toast({
-        title: "Hata",
-        description: error.message || "Profil güncellenemedi",
-        variant: "destructive",
-      })
-    } else {
       toast({
         title: "Başarılı",
         description: "Profil güncellendi",
       })
       router.push("/profil")
       router.refresh()
+    } catch (error: unknown) {
+      console.error("[v0] Error updating profile:", error)
+      toast({
+        title: "Hata",
+        description: error instanceof Error ? error.message : "Profil güncellenemedi",
+        variant: "destructive",
+      })
     }
     setIsSubmitting(false)
   }

@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,22 +13,20 @@ import { tr } from "date-fns/locale"
 import { ArrowLeft } from "lucide-react"
 
 export default async function AdminUsersPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-  if (!profile?.is_admin) {
+  if (!user.isAdmin) {
     redirect("/")
   }
 
-  const { data: users } = await supabase.from("profiles").select("*").order("created_at", { ascending: false })
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -56,13 +55,13 @@ export default async function AdminUsersPage() {
                   <div key={userProfile.id} className="flex items-center justify-between p-4 rounded-lg border">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={userProfile.avatar_url || "/placeholder.svg"} />
-                        <AvatarFallback>{userProfile.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
+                        <AvatarImage src={userProfile.avatarUrl || "/placeholder.svg"} />
+                        <AvatarFallback>{userProfile.displayName?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-foreground">{userProfile.display_name}</p>
-                          {userProfile.is_admin && <Badge variant="destructive">Admin</Badge>}
+                          <p className="font-semibold text-foreground">{userProfile.displayName}</p>
+                          {userProfile.isAdmin && <Badge variant="destructive">Admin</Badge>}
                         </div>
                         <p className="text-sm text-muted-foreground">{userProfile.email}</p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
@@ -70,7 +69,7 @@ export default async function AdminUsersPage() {
                           <span>•</span>
                           <span>{userProfile.points} puan</span>
                           <span>•</span>
-                          <span>{format(new Date(userProfile.created_at), "d MMM yyyy", { locale: tr })}</span>
+                          <span>{format(new Date(userProfile.createdAt), "d MMM yyyy", { locale: tr })}</span>
                         </div>
                       </div>
                     </div>

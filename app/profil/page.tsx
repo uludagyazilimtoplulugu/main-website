@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,61 +14,57 @@ import { tr } from "date-fns/locale"
 import { Calendar, Trophy, Star, Edit, BookOpen, CalendarCheck } from "lucide-react"
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
   // Fetch user profile
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+  const profile = await prisma.user.findUnique({
+    where: { id: user.id },
+  })
 
-  const isAdmin = profile?.is_admin === true
+  const isAdmin = user.isAdmin === true
 
   // Fetch user badges
-  const { data: userBadges } = await supabase
-    .from("user_badges")
-    .select(
-      `
-      earned_at,
-      badge:badges(id, name, icon, color)
-    `,
-    )
-    .eq("user_id", user.id)
-    .order("earned_at", { ascending: false })
+  const userBadges = await prisma.userBadge.findMany({
+    where: { userId: user.id },
+    include: {
+      badge: {
+        select: { id: true, name: true, icon: true, color: true },
+      },
+    },
+    orderBy: { earnedAt: "desc" },
+  })
 
   // Fetch user activities
-  const { data: activities } = await supabase
-    .from("activities")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(10)
+  const activities = await prisma.activity.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  })
 
   // Fetch user's blog posts
-  const { data: blogPosts } = await supabase
-    .from("blog_posts")
-    .select("id, title, slug, created_at, views, published")
-    .eq("author_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(5)
+  const blogPosts = await prisma.blogPost.findMany({
+    where: { authorId: user.id },
+    select: { id: true, title: true, slug: true, createdAt: true, views: true, published: true },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  })
 
   // Fetch user's event registrations
-  const { data: eventRegistrations } = await supabase
-    .from("event_registrations")
-    .select(
-      `
-      status,
-      created_at,
-      event:events(id, title, slug, event_date)
-    `,
-    )
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(5)
+  const eventRegistrations = await prisma.eventRegistration.findMany({
+    where: { userId: user.id },
+    include: {
+      event: {
+        select: { id: true, title: true, slug: true, eventDate: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -79,29 +76,29 @@ export default async function ProfilePage() {
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-6 items-start">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile?.avatar_url || "/placeholder.svg"} />
+                  <AvatarImage src={profile?.avatarUrl || "/placeholder.svg"} />
                   <AvatarFallback className="text-2xl">
-                    {profile?.display_name?.charAt(0).toUpperCase() || "?"}
+                    {profile?.displayName?.charAt(0).toUpperCase() || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-bold text-foreground">{profile?.display_name}</h1>
+                    <h1 className="text-3xl font-bold text-foreground">{profile?.displayName}</h1>
                     <Badge variant="outline" className="text-base">
                       Seviye {profile?.level}
                     </Badge>
                   </div>
-                  <p className="text-lg text-muted-foreground mb-4">{profile?.full_name}</p>
+                  <p className="text-lg text-muted-foreground mb-4">{profile?.fullName}</p>
                   {profile?.bio && <p className="text-foreground mb-4">{profile.bio}</p>}
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Trophy className="h-4 w-4" />
                       <span>{profile?.points || 0} puan</span>
                     </div>
-                    {profile?.created_at && (
+                    {profile?.createdAt && (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>Katılım: {format(new Date(profile.created_at), "MM yyyy", { locale: tr })}</span>
+                        <span>Katılım: {format(new Date(profile.createdAt), "MM yyyy", { locale: tr })}</span>
                       </div>
                     )}
                   </div>
@@ -135,7 +132,7 @@ export default async function ProfilePage() {
                             <div className="flex-1">
                               <p className="font-medium text-foreground">{post.title}</p>
                               <p className="text-xs text-muted-foreground">
-                                {format(new Date(post.created_at), "d MMMM yyyy", { locale: tr })} • {post.views}{" "}
+                                {format(new Date(post.createdAt), "d MMMM yyyy", { locale: tr })} • {post.views}{" "}
                                 görüntülenme
                               </p>
                             </div>
@@ -185,7 +182,7 @@ export default async function ProfilePage() {
                             <div className="flex-1">
                               <p className="font-medium text-foreground">{registration.event?.title}</p>
                               <p className="text-xs text-muted-foreground">
-                                {format(new Date(registration.event?.event_date), "d MMMM yyyy, HH:mm", { locale: tr })}
+                                {format(new Date(registration.event?.eventDate), "d MMMM yyyy, HH:mm", { locale: tr })}
                               </p>
                             </div>
                             <Badge
@@ -239,7 +236,7 @@ export default async function ProfilePage() {
                           <div className="flex-1">
                             <p className="text-sm text-foreground">{activity.description}</p>
                             <p className="text-xs text-muted-foreground">
-                              {format(new Date(activity.created_at), "d MMMM yyyy, HH:mm", { locale: tr })}
+                              {format(new Date(activity.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
                             </p>
                           </div>
                         </div>

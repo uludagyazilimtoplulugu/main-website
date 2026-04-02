@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -28,7 +27,6 @@ export function NewEventForm({ userId }: { userId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -50,37 +48,30 @@ export function NewEventForm({ userId }: { userId: string }) {
     e.preventDefault()
     setIsSubmitting(true)
 
-    const { data, error } = await supabase
-      .from("events")
-      .insert({
-        title,
-        slug,
-        description,
-        location,
-        event_date: eventDate,
-        end_date: endDate || null,
-        cover_image: coverImage || null,
-        max_participants: maxParticipants ? Number.parseInt(maxParticipants) : null,
-        registration_deadline: registrationDeadline || null,
-        organizer_id: userId,
-        published,
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, slug, description, location, eventDate, endDate: endDate || null, coverImage: coverImage || null, maxParticipants: maxParticipants ? Number.parseInt(maxParticipants) : null, registrationDeadline: registrationDeadline || null, published }),
       })
-      .select()
-      .single()
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Etkinlik oluşturulamadı")
+      }
+      const data = await res.json()
 
-    if (error) {
-      console.error("[v0] Error creating event:", error)
-      toast({
-        title: "Hata",
-        description: error.message || "Etkinlik oluşturulamadı",
-        variant: "destructive",
-      })
-    } else {
       toast({
         title: "Başarılı",
         description: "Etkinlik oluşturuldu",
       })
       router.push(`/etkinlikler/${data.slug}`)
+    } catch (error: unknown) {
+      console.error("[v0] Error creating event:", error)
+      toast({
+        title: "Hata",
+        description: error instanceof Error ? error.message : "Etkinlik oluşturulamadı",
+        variant: "destructive",
+      })
     }
     setIsSubmitting(false)
   }

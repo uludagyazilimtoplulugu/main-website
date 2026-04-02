@@ -1,43 +1,39 @@
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Users, BookOpen, Calendar, Trophy, MessageSquare, Mail } from "lucide-react"
+import { Users, BookOpen, Calendar, Trophy, MessageSquare, Mail, UserCheck, Star } from "lucide-react"
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
   if (!user) {
     redirect("/giris")
   }
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-  if (!profile?.is_admin) {
+  if (!user.isAdmin) {
     redirect("/")
   }
 
   // Fetch stats
-  const { count: usersCount } = await supabase.from("profiles").select("*", { count: "exact", head: true })
+  const usersCount = await prisma.user.count()
 
-  const { count: postsCount } = await supabase.from("blog_posts").select("*", { count: "exact", head: true })
+  const postsCount = await prisma.blogPost.count()
 
-  const { count: eventsCount } = await supabase.from("events").select("*", { count: "exact", head: true })
+  const eventsCount = await prisma.event.count()
 
-  const { count: badgesCount } = await supabase.from("badges").select("*", { count: "exact", head: true })
+  const badgesCount = await prisma.badge.count()
 
-  const { count: commentsCount } = await supabase.from("blog_comments").select("*", { count: "exact", head: true })
+  const commentsCount = await prisma.blogComment.count()
 
-  const { count: contactCount } = await supabase
-    .from("contact_submissions")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "new")
+  const contactCount = await prisma.contactSubmission.count({
+    where: { status: "new" },
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -182,6 +178,30 @@ export default async function AdminDashboardPage() {
               <CardContent>
                 <Button asChild className="w-full">
                   <Link href="/admin/kategoriler">Kategorileri Yönet</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>YK Yönetimi</CardTitle>
+                <CardDescription>Yönetim kurulu dönem ve üyelerini yönet</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full">
+                  <Link href="/admin/yonetim-kurulu">YK Yönetimi</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Puan Yönetimi</CardTitle>
+                <CardDescription>Kullanıcı puanlarını ve kuralları yönet</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full">
+                  <Link href="/admin/puanlar">Puanları Yönet</Link>
                 </Button>
               </CardContent>
             </Card>

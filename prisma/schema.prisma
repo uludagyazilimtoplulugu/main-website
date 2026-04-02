@@ -1,0 +1,382 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== AUTH & KULLANICI ====================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  displayName  String?  @map("display_name")
+  bio          String?
+  avatarUrl    String?  @map("avatar_url")
+  isAdmin      Boolean  @default(false) @map("is_admin")
+  points       Int      @default(0)
+  level        Int      @default(1)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  blogPosts          BlogPost[]
+  blogComments       BlogComment[]
+  organizedEvents    Event[]             @relation("EventOrganizer")
+  eventRegistrations EventRegistration[]
+  userBadges         UserBadge[]
+  activities         Activity[]
+  projects           Project[]
+  galleryImages      GalleryImage[]
+  boardMembership    BoardMember?        @relation("BoardMemberProfile")
+  attendanceLogs     EventAttendanceLog[]
+  eventFeedbacks     EventFeedback[]
+  sessions           Session[]
+  accounts           Account[]
+
+  @@map("users")
+}
+
+// NextAuth.js required tables
+model Account {
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ==================== BLOG ====================
+
+model BlogCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String   @default("#44657A")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  posts BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id         String   @id @default(uuid())
+  title      String
+  slug       String   @unique
+  excerpt    String?
+  content    String
+  coverImage String?  @map("cover_image")
+  authorId   String   @map("author_id")
+  categoryId String?  @map("category_id")
+  published  Boolean  @default(false)
+  views      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  comments BlogComment[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([published])
+  @@map("blog_posts")
+}
+
+model BlogComment {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  authorId  String   @map("author_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("blog_comments")
+}
+
+// ==================== ETKİNLİKLER ====================
+
+model Event {
+  id                   String    @id @default(uuid())
+  title                String
+  slug                 String    @unique
+  description          String
+  location             String
+  eventDate            DateTime  @map("event_date")
+  endDate              DateTime? @map("end_date")
+  coverImage           String?   @map("cover_image")
+  maxParticipants      Int?      @map("max_participants")
+  registrationDeadline DateTime? @map("registration_deadline")
+  organizerId          String    @map("organizer_id")
+  published            Boolean   @default(false)
+  attendancePoints     Int       @default(50) @map("attendance_points")
+  eventStatus          String    @default("upcoming") @map("event_status")
+  summary              String?
+  galleryImages        String[]  @map("gallery_images")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  organizer      User                 @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  registrations  EventRegistration[]
+  qrTokens       EventQrToken[]
+  attendanceLogs EventAttendanceLog[]
+  feedbacks      EventFeedback[]
+  galleryPhotos  GalleryImage[]
+
+  @@index([organizerId])
+  @@index([published])
+  @@map("events")
+}
+
+model EventRegistration {
+  id        String   @id @default(uuid())
+  eventId   String   @map("event_id")
+  userId    String   @map("user_id")
+  status    String   @default("registered")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@map("event_registrations")
+}
+
+model EventQrToken {
+  id        String   @id @default(uuid())
+  eventId   String   @map("event_id")
+  token     String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_qr_tokens")
+}
+
+model EventAttendanceLog {
+  id            String   @id @default(uuid())
+  eventId       String   @map("event_id")
+  userId        String   @map("user_id")
+  scannedAt     DateTime @default(now()) @map("scanned_at")
+  pointsAwarded Int      @default(0) @map("points_awarded")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_attendance_logs")
+}
+
+model EventFeedback {
+  id        String   @id @default(uuid())
+  eventId   String   @map("event_id")
+  userId    String   @map("user_id")
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_feedbacks")
+}
+
+// ==================== OYUNLAŞTIRMA ====================
+
+model Badge {
+  id             String   @id @default(uuid())
+  name           String   @unique
+  description    String
+  icon           String
+  color          String   @default("#44657A")
+  pointsRequired Int      @default(0) @map("points_required")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  badgeId  String   @map("badge_id")
+  earnedAt DateTime @default(now()) @map("earned_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Activity {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  activityType String   @map("activity_type")
+  points       Int
+  description  String
+  referenceId  String?  @map("reference_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("activities")
+}
+
+model PointRule {
+  id           String   @id @default(uuid())
+  activityType String   @unique @map("activity_type")
+  points       Int
+  description  String
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("point_rules")
+}
+
+// ==================== YÖNETİM KURULU ====================
+
+model BoardTerm {
+  id        String   @id @default(uuid())
+  name      String
+  startYear Int      @map("start_year")
+  endYear   Int      @map("end_year")
+  isCurrent Boolean  @default(false) @map("is_current")
+  sortOrder Int      @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members BoardMember[]
+
+  @@map("board_terms")
+}
+
+model BoardMember {
+  id            String   @id @default(uuid())
+  termId        String   @map("term_id")
+  fullName      String   @map("full_name")
+  position      String
+  positionOrder Int      @map("position_order")
+  bio           String?
+  photoUrl      String?  @map("photo_url")
+  linkedinUrl   String?  @map("linkedin_url")
+  githubUrl     String?  @map("github_url")
+  profileId     String?  @unique @map("profile_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  term    BoardTerm @relation(fields: [termId], references: [id], onDelete: Cascade)
+  profile User?    @relation("BoardMemberProfile", fields: [profileId], references: [id], onDelete: SetNull)
+
+  @@map("board_members")
+}
+
+// ==================== PROJELER ====================
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  techStack   String[] @map("tech_stack")
+  githubUrl   String?  @map("github_url")
+  demoUrl     String?  @map("demo_url")
+  coverImage  String?  @map("cover_image")
+  authorId    String   @map("author_id")
+  featured    Boolean  @default(false)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+// ==================== SPONSORLAR ====================
+
+model Sponsor {
+  id         String   @id @default(uuid())
+  name       String
+  logoUrl    String   @map("logo_url")
+  websiteUrl String?  @map("website_url")
+  tier       String   @default("silver")
+  sortOrder  Int      @default(0) @map("sort_order")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("sponsors")
+}
+
+// ==================== GALERİ ====================
+
+model GalleryImage {
+  id         String   @id @default(uuid())
+  eventId    String?  @map("event_id")
+  imageUrl   String   @map("image_url")
+  caption    String?
+  uploadedBy String   @map("uploaded_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  event    Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  uploader User   @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  @@map("gallery_images")
+}
+
+// ==================== İLETİŞİM ====================
+
+model ContactSubmission {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("new")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_submissions")
+}

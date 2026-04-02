@@ -4,62 +4,69 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CounterAnimation } from "@/components/counter-animation"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { BookOpen, Calendar, Trophy, Users, Code2, Rocket, Star } from "lucide-react"
+import { SponsorGrid } from "@/components/sponsor-grid"
 
 export default async function HomePage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const user = session?.user ?? null
 
-  const { data: recentPosts } = await supabase
-    .from("blog_posts")
-    .select(
-      `
-      id,
-      title,
-      slug,
-      excerpt,
-      created_at,
-      author:profiles(display_name)
-    `,
-    )
-    .eq("published", true)
-    .order("created_at", { ascending: false })
-    .limit(3)
+  const recentPosts = await prisma.blogPost.findMany({
+    where: { published: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      createdAt: true,
+      author: {
+        select: { displayName: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+  })
 
-  const { data: upcomingEvents } = await supabase
-    .from("events")
-    .select(
-      `
-      id,
-      title,
-      slug,
-      event_date,
-      location
-    `,
-    )
-    .eq("published", true)
-    .gte("event_date", new Date().toISOString())
-    .order("event_date", { ascending: true })
-    .limit(3)
+  const now = new Date()
 
-  const { data: pastEvents } = await supabase
-    .from("events")
-    .select(
-      `
-      id,
-      title,
-      slug,
-      event_date,
-      location
-    `,
-    )
-    .eq("published", true)
-    .lt("event_date", new Date().toISOString())
-    .order("event_date", { ascending: false })
-    .limit(3)
+  const upcomingEvents = await prisma.event.findMany({
+    where: {
+      published: true,
+      eventDate: { gte: now },
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      eventDate: true,
+      location: true,
+    },
+    orderBy: { eventDate: "asc" },
+    take: 3,
+  })
+
+  const pastEvents = await prisma.event.findMany({
+    where: {
+      published: true,
+      eventDate: { lt: now },
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      eventDate: true,
+      location: true,
+    },
+    orderBy: { eventDate: "desc" },
+    take: 3,
+  })
+
+  const activeSponsors = await prisma.sponsor.findMany({
+    where: { isActive: true },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -119,21 +126,21 @@ export default async function HomePage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8 relative z-10">
             <div className="text-center">
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl text-balance animate-fade-in-up">
-                Uludağ Yazılım Topluluğu
+                Uludag Yazilim Toplulugu
               </h1>
               <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto text-balance animate-fade-in-up stagger-1">
-                Bursa Uludağ Üniversitesi öğrencilerinin yazılım ve teknoloji alanında birlikte öğrenip geliştiği,
-                projeler ürettiği ve etkinlikler düzenlediği topluluk platformu.
+                Bursa Uludag Universitesi ogrencilerinin yazilim ve teknoloji alaninda birlikte ogrenip gelistigi,
+                projeler urettigi ve etkinlikler duzenledigi topluluk platformu.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6 animate-fade-in-up stagger-2">
                 {user ? (
                   <Button size="lg" asChild className="hover:scale-105 transition-transform">
-                    <Link href="/blog">Blog'u Keşfet</Link>
+                    <Link href="/blog">Blog'u Kesfet</Link>
                   </Button>
                 ) : (
                   <>
                     <Button size="lg" asChild className="hover:scale-105 transition-transform">
-                      <Link href="/kayit">Hemen Katıl</Link>
+                      <Link href="/kayit">Hemen Katil</Link>
                     </Button>
                     <Button
                       size="lg"
@@ -155,16 +162,16 @@ export default async function HomePage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center mb-16 animate-fade-in-up">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Neler Sunuyoruz?</h2>
-              <p className="mt-4 text-lg text-muted-foreground">Topluluğumuzda seni bekleyen fırsatlar</p>
+              <p className="mt-4 text-lg text-muted-foreground">Toplulugumuzda seni bekleyen firsatlar</p>
             </div>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Link href="/blog" className="block">
                 <Card className="animate-scale-in stagger-1 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-full">
                   <CardHeader>
                     <BookOpen className="h-10 w-10 text-primary mb-4" />
-                    <CardTitle>Blog ve İçerikler</CardTitle>
+                    <CardTitle>Blog ve Icerikler</CardTitle>
                     <CardDescription>
-                      Teknoloji, yazılım ve kişisel gelişim konularında kaliteli içerikler
+                      Teknoloji, yazilim ve kisisel gelisim konularinda kaliteli icerikler
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -185,7 +192,7 @@ export default async function HomePage() {
                   <CardHeader>
                     <Trophy className="h-10 w-10 text-primary mb-4" />
                     <CardTitle>Gamification</CardTitle>
-                    <CardDescription>Puan topla, rozet kazan, sıralamada yüksel</CardDescription>
+                    <CardDescription>Puan topla, rozet kazan, siralamada yuksel</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -200,7 +207,7 @@ export default async function HomePage() {
                   <CardHeader>
                     <Users className="h-10 w-10 text-primary mb-4" />
                     <CardTitle>Topluluk</CardTitle>
-                    <CardDescription>Benzer ilgi alanlarına sahip kişilerle tanış ve network kur</CardDescription>
+                    <CardDescription>Benzer ilgi alanlarina sahip kisilerle tanis ve network kur</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -215,7 +222,7 @@ export default async function HomePage() {
                   <CardHeader>
                     <Code2 className="h-10 w-10 text-primary mb-4" />
                     <CardTitle>Projeler</CardTitle>
-                    <CardDescription>Birlikte proje geliştir, deneyim kazan</CardDescription>
+                    <CardDescription>Birlikte proje gelistir, deneyim kazan</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -224,7 +231,7 @@ export default async function HomePage() {
                 <CardHeader>
                   <Rocket className="h-10 w-10 text-primary mb-4" />
                   <CardTitle>Kariyer</CardTitle>
-                  <CardDescription>İş fırsatları, staj olanakları ve kariyer rehberliği</CardDescription>
+                  <CardDescription>Is firsatlari, staj olanaklari ve kariyer rehberligi</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -249,7 +256,7 @@ export default async function HomePage() {
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">Etkinlikler</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Topluluğumuzun düzenlediği workshop, hackathon, seminer ve sosyal etkinlikler
+                Toplulugumuzun duzenledigi workshop, hackathon, seminer ve sosyal etkinlikler
               </p>
             </div>
 
@@ -259,15 +266,15 @@ export default async function HomePage() {
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                     <Rocket className="h-6 w-6 text-primary" />
-                    Yaklaşan Etkinlikler
+                    Yaklasan Etkinlikler
                   </h3>
-                  <p className="text-muted-foreground mt-1">Kaçırma, hemen kaydol!</p>
+                  <p className="text-muted-foreground mt-1">Kacirma, hemen kaydol!</p>
                 </div>
               </div>
               {upcomingEvents && upcomingEvents.length > 0 ? (
                 <>
                   <div className="grid gap-6 md:grid-cols-3 mb-6">
-                    {upcomingEvents.map((event: any, index: number) => (
+                    {upcomingEvents.map((event, index) => (
                       <Card
                         key={event.id}
                         className={`animate-fade-in-up stagger-${index + 1} hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-primary/20`}
@@ -281,7 +288,7 @@ export default async function HomePage() {
                           <div className="flex items-center gap-2 text-sm font-medium text-primary">
                             <Calendar className="h-4 w-4" />
                             <span>
-                              {new Date(event.event_date).toLocaleDateString("tr-TR", {
+                              {new Date(event.eventDate).toLocaleDateString("tr-TR", {
                                 day: "numeric",
                                 month: "long",
                                 year: "numeric",
@@ -293,7 +300,7 @@ export default async function HomePage() {
                             <span className="line-clamp-1">{event.location}</span>
                           </div>
                           <Button asChild size="sm" className="w-full mt-4">
-                            <Link href={`/etkinlikler/${event.slug}`}>Detayları Gör</Link>
+                            <Link href={`/etkinlikler/${event.slug}`}>Detaylari Gor</Link>
                           </Button>
                         </CardContent>
                       </Card>
@@ -302,7 +309,7 @@ export default async function HomePage() {
                   <div className="text-center animate-fade-in stagger-4">
                     <Button variant="outline" asChild className="hover:scale-105 transition-transform bg-transparent">
                       <Link href="/etkinlikler">
-                        Tüm Etkinlikleri Gör
+                        Tum Etkinlikleri Gor
                         <Calendar className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
@@ -311,7 +318,7 @@ export default async function HomePage() {
               ) : (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
-                  <p className="text-muted-foreground">Yaklaşan etkinlik bulunmuyor</p>
+                  <p className="text-muted-foreground">Yaklasan etkinlik bulunmuyor</p>
                 </div>
               )}
             </div>
@@ -323,13 +330,13 @@ export default async function HomePage() {
                   <div>
                     <h3 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                       <Star className="h-6 w-6 text-muted-foreground" />
-                      Geçmiş Etkinlikler
+                      Gecmis Etkinlikler
                     </h3>
-                    <p className="text-muted-foreground mt-1">Daha önce gerçekleştirdiğimiz etkinlikler</p>
+                    <p className="text-muted-foreground mt-1">Daha once gerceklestirdigimiz etkinlikler</p>
                   </div>
                 </div>
                 <div className="grid gap-6 md:grid-cols-3">
-                  {pastEvents.map((event: any, index: number) => (
+                  {pastEvents.map((event, index) => (
                     <Card
                       key={event.id}
                       className={`animate-fade-in-up stagger-${index + 1} hover:shadow-lg hover:-translate-y-1 transition-all duration-300 opacity-90`}
@@ -343,7 +350,7 @@ export default async function HomePage() {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            {new Date(event.event_date).toLocaleDateString("tr-TR", {
+                            {new Date(event.eventDate).toLocaleDateString("tr-TR", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
@@ -369,25 +376,25 @@ export default async function HomePage() {
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">Biz Kimiz?</h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Bursa Uludağ Üniversitesi bünyesinde kurulmuş, yazılım ve teknoloji alanında öğrencilerin bir araya
-                geldiği dinamik bir topluluk
+                Bursa Uludag Universitesi bunyesinde kurulmus, yazilim ve teknoloji alaninda ogrencilerin bir araya
+                geldigi dinamik bir topluluk
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3 mb-8">
               <Card className="animate-slide-in-left stagger-1 hover:shadow-lg hover:scale-105 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-center">Kuruluş</CardTitle>
+                  <CardTitle className="text-center">Kurulus</CardTitle>
                   <CardDescription className="text-center text-2xl font-bold text-primary mt-2">2020</CardDescription>
-                  <CardDescription className="text-center">Aktif 4 yıldır</CardDescription>
+                  <CardDescription className="text-center">Aktif 4 yildir</CardDescription>
                 </CardHeader>
               </Card>
               <Card className="animate-scale-in stagger-2 hover:shadow-lg hover:scale-105 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-center">Üye Sayısı</CardTitle>
+                  <CardTitle className="text-center">Uye Sayisi</CardTitle>
                   <CardDescription className="text-center text-2xl font-bold text-primary mt-2">
                     <CounterAnimation end={500} suffix="+" />
                   </CardDescription>
-                  <CardDescription className="text-center">Aktif topluluk üyesi</CardDescription>
+                  <CardDescription className="text-center">Aktif topluluk uyesi</CardDescription>
                 </CardHeader>
               </Card>
               <Card className="animate-slide-in-right stagger-3 hover:shadow-lg hover:scale-105 transition-all duration-300">
@@ -396,7 +403,7 @@ export default async function HomePage() {
                   <CardDescription className="text-center text-2xl font-bold text-primary mt-2">
                     <CounterAnimation end={50} suffix="+" />
                   </CardDescription>
-                  <CardDescription className="text-center">Düzenlenen etkinlik</CardDescription>
+                  <CardDescription className="text-center">Duzenlenen etkinlik</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -415,29 +422,29 @@ export default async function HomePage() {
               <CardContent className="py-12">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">İletişime Geçin</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">Iletisime Gecin</h2>
                     <p className="text-lg text-muted-foreground mb-6">
-                      Aklınıza takılan sorular mı var? Bize ulaşmak için iletişim formunu doldurun, en kısa sürede size
-                      geri dönelim.
+                      Akliniza takilan sorular mi var? Bize ulasmak icin iletisim formunu doldurun, en kisa surede size
+                      geri donelim.
                     </p>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Users className="h-5 w-5 text-primary" />
-                        <span>Topluluk aktiviteleri hakkında bilgi</span>
+                        <span>Topluluk aktiviteleri hakkinda bilgi</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Code2 className="h-5 w-5 text-primary" />
-                        <span>Sponsorluk ve işbirliği fırsatları</span>
+                        <span>Sponsorluk ve isbirligi firsatlari</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <BookOpen className="h-5 w-5 text-primary" />
-                        <span>Etkinlik talepleri ve öneriler</span>
+                        <span>Etkinlik talepleri ve oneriler</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex justify-center">
                     <Button size="lg" asChild className="hover:scale-110 transition-transform animate-bounce-subtle">
-                      <Link href="/iletisim">İletişim Formu</Link>
+                      <Link href="/iletisim">Iletisim Formu</Link>
                     </Button>
                   </div>
                 </div>
@@ -454,7 +461,7 @@ export default async function HomePage() {
                 Rakamlarla Biz
               </h2>
               <p className="text-lg text-muted-foreground mb-12 animate-fade-in-up stagger-1">
-                Topluluğumuzun büyüklüğünü ve etkisini gösteren istatistikler
+                Toplulugumuzun buyuklugunu ve etkisini gosteren istatistikler
               </p>
             </div>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
@@ -462,26 +469,39 @@ export default async function HomePage() {
                 <div className="text-5xl font-bold text-primary mb-2">
                   <CounterAnimation end={500} suffix="+" />
                 </div>
-                <div className="text-lg font-medium text-foreground">Aktif Üye</div>
-                <div className="text-sm text-muted-foreground mt-1">Yazılım tutkunu öğrenci</div>
+                <div className="text-lg font-medium text-foreground">Aktif Uye</div>
+                <div className="text-sm text-muted-foreground mt-1">Yazilim tutkunu ogrenci</div>
               </div>
               <div className="flex flex-col items-center animate-scale-in stagger-2">
                 <div className="text-5xl font-bold text-primary mb-2">
                   <CounterAnimation end={50} suffix="+" />
                 </div>
-                <div className="text-lg font-medium text-foreground">Düzenlenen Etkinlik</div>
+                <div className="text-lg font-medium text-foreground">Duzenlenen Etkinlik</div>
                 <div className="text-sm text-muted-foreground mt-1">Workshop, seminer ve hackathon</div>
               </div>
               <div className="flex flex-col items-center animate-scale-in stagger-3">
                 <div className="text-5xl font-bold text-primary mb-2">
                   <CounterAnimation end={100} suffix="+" />
                 </div>
-                <div className="text-lg font-medium text-foreground">Blog Yazısı</div>
-                <div className="text-sm text-muted-foreground mt-1">Kaliteli teknik içerik</div>
+                <div className="text-lg font-medium text-foreground">Blog Yazisi</div>
+                <div className="text-sm text-muted-foreground mt-1">Kaliteli teknik icerik</div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Sponsor Bandi */}
+        {activeSponsors.length > 0 && (
+          <section className="py-16 bg-background">
+            <div className="mx-auto max-w-7xl px-4 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">Sponsorlarimiz</h2>
+                <p className="text-muted-foreground">Toplulugumuzun degerli destekçileri</p>
+              </div>
+              <SponsorGrid sponsors={activeSponsors} />
+            </div>
+          </section>
+        )}
 
         {/* CTA Section */}
         {!user && (
@@ -490,12 +510,12 @@ export default async function HomePage() {
               <Card className="bg-primary text-primary-foreground animate-scale-in hover:shadow-2xl transition-all duration-300">
                 <CardContent className="py-12 text-center">
                   <Star className="h-12 w-12 mx-auto mb-6 animate-bounce-subtle" />
-                  <h2 className="text-3xl font-bold mb-4">Topluluğa Katıl</h2>
+                  <h2 className="text-3xl font-bold mb-4">Topluluga Katil</h2>
                   <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-                    Hemen kaydol, etkinliklere katıl, blog yaz, puan kazan ve rozetleri topla!
+                    Hemen kaydol, etkinliklere katil, blog yaz, puan kazan ve rozetleri topla!
                   </p>
                   <Button size="lg" variant="secondary" asChild className="hover:scale-110 transition-transform">
-                    <Link href="/kayit">Ücretsiz Kayıt Ol</Link>
+                    <Link href="/kayit">Ucretsiz Kayit Ol</Link>
                   </Button>
                 </CardContent>
               </Card>
