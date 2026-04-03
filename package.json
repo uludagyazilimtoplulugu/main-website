@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev --port 3500",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start --port 3500"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

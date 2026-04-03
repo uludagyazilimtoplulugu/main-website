@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Linkedin, Github } from "lucide-react"
 import Link from "next/link"
@@ -32,12 +31,19 @@ export function BoardMemberCard({
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="pt-6">
         <div className="flex flex-col items-center text-center">
-          <Avatar className="h-20 w-20 mb-4">
-            <AvatarImage src={photoUrl ?? undefined} alt={fullName} />
-            <AvatarFallback className="text-lg font-semibold bg-primary/10 text-primary">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="h-32 w-32 mb-4 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt={fullName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl font-semibold text-primary">
+                {initials}
+              </span>
+            )}
+          </div>
           <h3 className="font-bold text-lg">{fullName}</h3>
           <p className="text-sm text-primary font-medium mb-2">{position}</p>
           {bio && (
