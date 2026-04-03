@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { ImageUpload } from "@/components/image-upload"
 import { ArrowLeft, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
@@ -111,7 +112,7 @@ export default function AdminSponsorsPage() {
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div><Label>Ad *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-                  <div><Label>Logo URL *</Label><Input value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })} /></div>
+                  <div><Label>Logo *</Label><ImageUpload value={form.logoUrl} onChange={(url) => setForm({ ...form, logoUrl: url })} placeholder="Logo yukle veya URL gir" /></div>
                   <div><Label>Website URL</Label><Input value={form.websiteUrl} onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })} /></div>
                   <div>
                     <Label>Tier</Label>

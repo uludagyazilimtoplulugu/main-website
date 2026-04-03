@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ImageUpload } from "@/components/image-upload"
 import { ArrowLeft, Plus, Trash2, Image as ImageIcon } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
@@ -55,7 +56,7 @@ export default function AdminGalleryPage() {
   }, [])
 
   async function addImage() {
-    if (!form.imageUrl) { toast.error("Gorsel URL zorunlu"); return }
+    if (!form.imageUrl) { toast.error("Gorsel zorunlu"); return }
     const res = await fetch("/api/gallery", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -111,20 +112,29 @@ export default function AdminGalleryPage() {
             <Card className="mb-8">
               <CardHeader><CardTitle>Fotograf Ekle</CardTitle></CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div><Label>Gorsel URL *</Label><Input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." /></div>
-                  <div><Label>Aciklama</Label><Input value={form.caption} onChange={(e) => setForm({ ...form, caption: e.target.value })} /></div>
+                <div className="grid gap-4">
                   <div>
-                    <Label>Etkinlik (opsiyonel)</Label>
-                    <Select value={form.eventId} onValueChange={(v) => setForm({ ...form, eventId: v })}>
-                      <SelectTrigger><SelectValue placeholder="Etkinlik sec..." /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Yok</SelectItem>
-                        {events.map((e) => (
-                          <SelectItem key={e.id} value={e.id}>{e.title}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>Gorsel *</Label>
+                    <ImageUpload
+                      value={form.imageUrl}
+                      onChange={(url) => setForm({ ...form, imageUrl: url })}
+                      placeholder="Fotograf yukle veya URL gir"
+                    />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div><Label>Aciklama</Label><Input value={form.caption} onChange={(e) => setForm({ ...form, caption: e.target.value })} /></div>
+                    <div>
+                      <Label>Etkinlik (opsiyonel)</Label>
+                      <Select value={form.eventId} onValueChange={(v) => setForm({ ...form, eventId: v })}>
+                        <SelectTrigger><SelectValue placeholder="Etkinlik sec..." /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Yok</SelectItem>
+                          {events.map((e) => (
+                            <SelectItem key={e.id} value={e.id}>{e.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
+import { ImageUpload } from "@/components/image-upload"
 import { Plus, Trash2, Edit2, ChevronDown, ChevronUp, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
@@ -289,10 +290,11 @@ export default function AdminBoardPage() {
                                   />
                                 </div>
                                 <div>
-                                  <Label>Fotograf URL</Label>
-                                  <Input
+                                  <Label>Fotograf</Label>
+                                  <ImageUpload
                                     value={memberForm.photoUrl}
-                                    onChange={(e) => setMemberForm({ ...memberForm, photoUrl: e.target.value })}
+                                    onChange={(url) => setMemberForm({ ...memberForm, photoUrl: url })}
+                                    placeholder="Fotograf yukle veya URL gir"
                                   />
                                 </div>
                                 <div>
