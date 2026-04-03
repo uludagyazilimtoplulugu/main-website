@@ -21,6 +21,8 @@ model User {
   points       Int      @default(0)
   level        Int      @default(1)
   createdAt    DateTime @default(now()) @map("created_at")
+  emailVerified    Boolean  @default(false) @map("email_verified")
+  verificationCode String?  @map("verification_code")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   blogPosts          BlogPost[]

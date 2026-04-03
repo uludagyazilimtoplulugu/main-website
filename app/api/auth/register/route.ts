@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { sendVerificationCode } from "@/lib/mail"
+
+function generateCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +37,7 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await bcrypt.hash(password, 12)
+    const verificationCode = generateCode()
 
     const user = await prisma.user.create({
       data: {
@@ -39,6 +45,7 @@ export async function POST(request: Request) {
         passwordHash,
         fullName,
         displayName: displayName || fullName,
+        verificationCode,
       },
     })
 
@@ -56,8 +63,11 @@ export async function POST(request: Request) {
       })
     }
 
+    // Mail gönder
+    await sendVerificationCode(email, verificationCode)
+
     return NextResponse.json(
-      { message: "Hesap başarıyla oluşturuldu" },
+      { message: "Hesap oluşturuldu. Doğrulama kodu e-postanıza gönderildi.", email },
       { status: 201 }
     )
   } catch (error) {

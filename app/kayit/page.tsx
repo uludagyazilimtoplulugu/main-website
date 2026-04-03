@@ -31,11 +31,11 @@ export default function SignUpPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, fullName, displayName }),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const data = await res.json()
         throw new Error(data.error || "Bir hata oluştu")
       }
-      router.push("/kayit-basarili")
+      router.push(`/kayit-basarili?email=${encodeURIComponent(email)}`)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Bir hata oluştu")
     } finally {
