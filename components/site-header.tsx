@@ -133,7 +133,7 @@ export function SiteHeader({
               <Button variant="ghost" asChild>
                 <Link href="/profil">Profilim</Link>
               </Button>
-              <Button variant="outline" onClick={() => signOut()}>Çıkış Yap</Button>
+              <Button variant="outline" onClick={() => signOut({ callbackUrl: "/" })}>Çıkış Yap</Button>
             </>
           ) : (
             <>
@@ -211,7 +211,7 @@ export function SiteHeader({
                   <Button variant="ghost" className="w-full" asChild>
                     <Link href="/profil">Profilim</Link>
                   </Button>
-                  <Button variant="outline" className="w-full bg-transparent" onClick={() => signOut()}>Çıkış Yap</Button>
+                  <Button variant="outline" className="w-full bg-transparent" onClick={() => signOut({ callbackUrl: "/" })}>Çıkış Yap</Button>
                 </>
               ) : (
                 <>
