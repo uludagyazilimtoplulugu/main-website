@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Twitter, Instagram } from "lucide-react"
+import { Github, Instagram, Linkedin } from "lucide-react"
 import Image from "next/image"
 
 export function SiteFooter() {
@@ -69,7 +69,7 @@ export function SiteFooter() {
             <h3 className="mb-4 text-sm font-semibold text-foreground">Sosyal Medya</h3>
             <div className="flex gap-4">
               <a
-                href="https://github.com"
+                href="https://github.com/uludagyazilimtoplulugu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
@@ -78,16 +78,16 @@ export function SiteFooter() {
                 <span className="sr-only">GitHub</span>
               </a>
               <a
-                href="https://twitter.com"
+                href="https://www.linkedin.com/company/uludagdev/posts/?feedView=all"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
+                <Linkedin className="h-5 w-5" />
+                <span className="sr-only">LinkedIn</span>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/uludagdev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"

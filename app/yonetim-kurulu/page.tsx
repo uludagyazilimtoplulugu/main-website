@@ -25,17 +25,17 @@ export default async function BoardPage() {
         <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
           <div className="text-center mb-16">
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-4">
-              Yonetim Kurulu
+              Yönetim Kurulu
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Toplulugumuzun yonetim kadrosu ve gecmis donem yoneticileri
+              Topluluğumuzun yönetim kadrosu ve geçmiş dönem yöneticileri
             </p>
           </div>
 
           {terms.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">
-                Henuz yonetim kurulu bilgisi eklenmemis.
+                Henüz yönetim kurulu bilgisi eklenmemiş.
               </p>
             </div>
           ) : (
@@ -47,12 +47,12 @@ export default async function BoardPage() {
                       {term.name} ({term.startYear}-{term.endYear})
                     </h2>
                     {term.isCurrent && (
-                      <Badge variant="default">Guncel Donem</Badge>
+                      <Badge variant="default">Güncel Dönem</Badge>
                     )}
                   </div>
                   {term.members.length === 0 ? (
                     <p className="text-muted-foreground">
-                      Bu donem icin henuz uye eklenmemis.
+                      Bu dönem için henüz üye eklenmemiş.
                     </p>
                   ) : (
                     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

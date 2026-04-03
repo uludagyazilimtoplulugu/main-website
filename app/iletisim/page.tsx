@@ -3,7 +3,7 @@ import { SiteFooter } from "@/components/site-footer"
 import { auth } from "@/lib/auth"
 import { ContactForm } from "@/components/contact-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, MapPin, Github, Twitter, Instagram } from "lucide-react"
+import { Mail, MapPin, Github, Linkedin, Instagram } from "lucide-react"
 
 export default async function ContactPage() {
   const session = await auth()
@@ -23,7 +23,7 @@ export default async function ContactPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Mesaj Gönder</CardTitle>
+                  <CardTitle>Mesaj Gönderin</CardTitle>
                   <CardDescription>Sorularınız veya önerileriniz için bize mesaj gönderin</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -42,7 +42,7 @@ export default async function ContactPage() {
                     <Mail className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <p className="font-medium text-foreground">E-posta</p>
-                      <p className="text-sm text-muted-foreground">info@uludagyazilim.com</p>
+                      <p className="text-sm text-muted-foreground">uludagyazilimtoplulugu@gmail.com</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -68,7 +68,7 @@ export default async function ContactPage() {
                 <CardContent>
                   <div className="flex flex-col gap-3">
                     <a
-                      href="https://github.com"
+                      href="https://github.com/uludagyazilimtoplulugu"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
@@ -77,16 +77,16 @@ export default async function ContactPage() {
                       <span className="text-sm font-medium text-foreground">GitHub</span>
                     </a>
                     <a
-                      href="https://twitter.com"
+                      href="https://www.linkedin.com/company/uludagdev/posts/?feedView=all"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                     >
-                      <Twitter className="h-5 w-5 text-primary" />
-                      <span className="text-sm font-medium text-foreground">Twitter</span>
+                      <Linkedin className="h-5 w-5 text-primary" />
+                      <span className="text-sm font-medium text-foreground">LinkedIn</span>
                     </a>
                     <a
-                      href="https://instagram.com"
+                      href="https://www.instagram.com/uludagdev"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"

@@ -126,21 +126,21 @@ export default async function HomePage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8 relative z-10">
             <div className="text-center">
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl text-balance animate-fade-in-up">
-                Uludag Yazilim Toplulugu
+                Uludağ Yazılım Topluluğu
               </h1>
               <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto text-balance animate-fade-in-up stagger-1">
-                Bursa Uludag Universitesi ogrencilerinin yazilim ve teknoloji alaninda birlikte ogrenip gelistigi,
-                projeler urettigi ve etkinlikler duzenledigi topluluk platformu.
+                Bursa Uludağ Üniversitesi öğrencilerinin yazılım ve teknoloji alanında birlikte öğrenip geliştiği,
+                projeler ürettiği ve etkinlikler düzenlediği topluluk platformu.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6 animate-fade-in-up stagger-2">
                 {user ? (
                   <Button size="lg" asChild className="hover:scale-105 transition-transform">
-                    <Link href="/blog">Blog'u Kesfet</Link>
+                    <Link href="/blog">Blog&apos;u Keşfet</Link>
                   </Button>
                 ) : (
                   <>
                     <Button size="lg" asChild className="hover:scale-105 transition-transform">
-                      <Link href="/kayit">Hemen Katil</Link>
+                      <Link href="/kayit">Hemen Katıl</Link>
                     </Button>
                     <Button
                       size="lg"
@@ -162,16 +162,16 @@ export default async function HomePage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center mb-16 animate-fade-in-up">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Neler Sunuyoruz?</h2>
-              <p className="mt-4 text-lg text-muted-foreground">Toplulugumuzda seni bekleyen firsatlar</p>
+              <p className="mt-4 text-lg text-muted-foreground">Topluluğumuzda seni bekleyen fırsatlar</p>
             </div>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Link href="/blog" className="block">
                 <Card className="animate-scale-in stagger-1 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-full">
                   <CardHeader>
                     <BookOpen className="h-10 w-10 text-primary mb-4" />
-                    <CardTitle>Blog ve Icerikler</CardTitle>
+                    <CardTitle>Blog ve İçerikler</CardTitle>
                     <CardDescription>
-                      Teknoloji, yazilim ve kisisel gelisim konularinda kaliteli icerikler
+                      Teknoloji, yazılım ve kişisel gelişim konularında kaliteli içerikler
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -192,13 +192,13 @@ export default async function HomePage() {
                   <CardHeader>
                     <Trophy className="h-10 w-10 text-primary mb-4" />
                     <CardTitle>Gamification</CardTitle>
-                    <CardDescription>Puan topla, rozet kazan, siralamada yuksel</CardDescription>
+                    <CardDescription>Puan topla, rozet kazan, sıralamada yüksel</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
 
               <Link
-                href="https://chat.whatsapp.com/TOPLULUK_LINK"
+                href="https://chat.whatsapp.com/CabOeexI4yvEqC7XPyf8Rb?mode=gi_t"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
@@ -207,13 +207,13 @@ export default async function HomePage() {
                   <CardHeader>
                     <Users className="h-10 w-10 text-primary mb-4" />
                     <CardTitle>Topluluk</CardTitle>
-                    <CardDescription>Benzer ilgi alanlarina sahip kisilerle tanis ve network kur</CardDescription>
+                    <CardDescription>Benzer ilgi alanlarına sahip kişilerle tanış ve network kur</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
 
               <Link
-                href="https://github.com/TOPLULUK_GITHUB"
+                href="https://github.com/uludagyazilimtoplulugu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
@@ -222,7 +222,7 @@ export default async function HomePage() {
                   <CardHeader>
                     <Code2 className="h-10 w-10 text-primary mb-4" />
                     <CardTitle>Projeler</CardTitle>
-                    <CardDescription>Birlikte proje gelistir, deneyim kazan</CardDescription>
+                    <CardDescription>Birlikte proje geliştir, deneyim kazan</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -231,7 +231,7 @@ export default async function HomePage() {
                 <CardHeader>
                   <Rocket className="h-10 w-10 text-primary mb-4" />
                   <CardTitle>Kariyer</CardTitle>
-                  <CardDescription>Is firsatlari, staj olanaklari ve kariyer rehberligi</CardDescription>
+                  <CardDescription>İş fırsatları, staj olanakları ve kariyer rehberliği</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -256,7 +256,7 @@ export default async function HomePage() {
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">Etkinlikler</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Toplulugumuzun duzenledigi workshop, hackathon, seminer ve sosyal etkinlikler
+                Topluluğumuzun düzenlediği workshop, hackathon, seminer ve sosyal etkinlikler
               </p>
             </div>
 
@@ -266,9 +266,9 @@ export default async function HomePage() {
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                     <Rocket className="h-6 w-6 text-primary" />
-                    Yaklasan Etkinlikler
+                    Yaklaşan Etkinlikler
                   </h3>
-                  <p className="text-muted-foreground mt-1">Kacirma, hemen kaydol!</p>
+                  <p className="text-muted-foreground mt-1">Kaçırma, hemen kaydol!</p>
                 </div>
               </div>
               {upcomingEvents && upcomingEvents.length > 0 ? (
@@ -300,7 +300,7 @@ export default async function HomePage() {
                             <span className="line-clamp-1">{event.location}</span>
                           </div>
                           <Button asChild size="sm" className="w-full mt-4">
-                            <Link href={`/etkinlikler/${event.slug}`}>Detaylari Gor</Link>
+                            <Link href={`/etkinlikler/${event.slug}`}>Detayları Gör</Link>
                           </Button>
                         </CardContent>
                       </Card>
@@ -309,7 +309,7 @@ export default async function HomePage() {
                   <div className="text-center animate-fade-in stagger-4">
                     <Button variant="outline" asChild className="hover:scale-105 transition-transform bg-transparent">
                       <Link href="/etkinlikler">
-                        Tum Etkinlikleri Gor
+                        Tüm Etkinlikleri Gör
                         <Calendar className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
@@ -318,7 +318,7 @@ export default async function HomePage() {
               ) : (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
-                  <p className="text-muted-foreground">Yaklasan etkinlik bulunmuyor</p>
+                  <p className="text-muted-foreground">Yaklaşan etkinlik bulunmuyor</p>
                 </div>
               )}
             </div>
@@ -330,9 +330,9 @@ export default async function HomePage() {
                   <div>
                     <h3 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                       <Star className="h-6 w-6 text-muted-foreground" />
-                      Gecmis Etkinlikler
+                      Geçmiş Etkinlikler
                     </h3>
-                    <p className="text-muted-foreground mt-1">Daha once gerceklestirdigimiz etkinlikler</p>
+                    <p className="text-muted-foreground mt-1">Daha önce gerçekleştirdiğimiz etkinlikler</p>
                   </div>
                 </div>
                 <div className="grid gap-6 md:grid-cols-3">
@@ -376,25 +376,25 @@ export default async function HomePage() {
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">Biz Kimiz?</h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Bursa Uludag Universitesi bunyesinde kurulmus, yazilim ve teknoloji alaninda ogrencilerin bir araya
-                geldigi dinamik bir topluluk
+                Bursa Uludağ Üniversitesi bünyesinde kurulmuş, yazılım ve teknoloji alanında öğrencilerin bir araya
+                geldiği dinamik bir topluluk
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3 mb-8">
               <Card className="animate-slide-in-left stagger-1 hover:shadow-lg hover:scale-105 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-center">Kurulus</CardTitle>
+                  <CardTitle className="text-center">Kuruluş</CardTitle>
                   <CardDescription className="text-center text-2xl font-bold text-primary mt-2">2020</CardDescription>
-                  <CardDescription className="text-center">Aktif 4 yildir</CardDescription>
+                  <CardDescription className="text-center">Aktif 4 yıldır</CardDescription>
                 </CardHeader>
               </Card>
               <Card className="animate-scale-in stagger-2 hover:shadow-lg hover:scale-105 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-center">Uye Sayisi</CardTitle>
+                  <CardTitle className="text-center">Üye Sayısı</CardTitle>
                   <CardDescription className="text-center text-2xl font-bold text-primary mt-2">
                     <CounterAnimation end={500} suffix="+" />
                   </CardDescription>
-                  <CardDescription className="text-center">Aktif topluluk uyesi</CardDescription>
+                  <CardDescription className="text-center">Aktif topluluk üyesi</CardDescription>
                 </CardHeader>
               </Card>
               <Card className="animate-slide-in-right stagger-3 hover:shadow-lg hover:scale-105 transition-all duration-300">
@@ -403,7 +403,7 @@ export default async function HomePage() {
                   <CardDescription className="text-center text-2xl font-bold text-primary mt-2">
                     <CounterAnimation end={50} suffix="+" />
                   </CardDescription>
-                  <CardDescription className="text-center">Duzenlenen etkinlik</CardDescription>
+                  <CardDescription className="text-center">Düzenlenen etkinlik</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -422,29 +422,29 @@ export default async function HomePage() {
               <CardContent className="py-12">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">Iletisime Gecin</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">İletişime Geçin</h2>
                     <p className="text-lg text-muted-foreground mb-6">
-                      Akliniza takilan sorular mi var? Bize ulasmak icin iletisim formunu doldurun, en kisa surede size
-                      geri donelim.
+                      Aklınıza takılan sorular mı var? Bize ulaşmak için iletişim formunu doldurun, en kısa sürede size
+                      geri dönelim.
                     </p>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Users className="h-5 w-5 text-primary" />
-                        <span>Topluluk aktiviteleri hakkinda bilgi</span>
+                        <span>Topluluk aktiviteleri hakkında bilgi</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Code2 className="h-5 w-5 text-primary" />
-                        <span>Sponsorluk ve isbirligi firsatlari</span>
+                        <span>Sponsorluk ve iş birliği fırsatları</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <BookOpen className="h-5 w-5 text-primary" />
-                        <span>Etkinlik talepleri ve oneriler</span>
+                        <span>Etkinlik talepleri ve öneriler</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex justify-center">
                     <Button size="lg" asChild className="hover:scale-110 transition-transform animate-bounce-subtle">
-                      <Link href="/iletisim">Iletisim Formu</Link>
+                      <Link href="/iletisim">İletişim Formu</Link>
                     </Button>
                   </div>
                 </div>
@@ -461,7 +461,7 @@ export default async function HomePage() {
                 Rakamlarla Biz
               </h2>
               <p className="text-lg text-muted-foreground mb-12 animate-fade-in-up stagger-1">
-                Toplulugumuzun buyuklugunu ve etkisini gosteren istatistikler
+                Topluluğumuzun büyüklüğünü ve etkisini gösteren istatistikler
               </p>
             </div>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
@@ -469,22 +469,22 @@ export default async function HomePage() {
                 <div className="text-5xl font-bold text-primary mb-2">
                   <CounterAnimation end={500} suffix="+" />
                 </div>
-                <div className="text-lg font-medium text-foreground">Aktif Uye</div>
-                <div className="text-sm text-muted-foreground mt-1">Yazilim tutkunu ogrenci</div>
+                <div className="text-lg font-medium text-foreground">Aktif Üye</div>
+                <div className="text-sm text-muted-foreground mt-1">Yazılım tutkunu öğrenci</div>
               </div>
               <div className="flex flex-col items-center animate-scale-in stagger-2">
                 <div className="text-5xl font-bold text-primary mb-2">
                   <CounterAnimation end={50} suffix="+" />
                 </div>
-                <div className="text-lg font-medium text-foreground">Duzenlenen Etkinlik</div>
+                <div className="text-lg font-medium text-foreground">Düzenlenen Etkinlik</div>
                 <div className="text-sm text-muted-foreground mt-1">Workshop, seminer ve hackathon</div>
               </div>
               <div className="flex flex-col items-center animate-scale-in stagger-3">
                 <div className="text-5xl font-bold text-primary mb-2">
-                  <CounterAnimation end={100} suffix="+" />
+                  <CounterAnimation end={10} suffix="+" />
                 </div>
-                <div className="text-lg font-medium text-foreground">Blog Yazisi</div>
-                <div className="text-sm text-muted-foreground mt-1">Kaliteli teknik icerik</div>
+                <div className="text-lg font-medium text-foreground">Blog Yazısı</div>
+                <div className="text-sm text-muted-foreground mt-1">Kaliteli teknik içerik</div>
               </div>
             </div>
           </div>
@@ -495,8 +495,8 @@ export default async function HomePage() {
           <section className="py-16 bg-background">
             <div className="mx-auto max-w-7xl px-4 lg:px-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">Sponsorlarimiz</h2>
-                <p className="text-muted-foreground">Toplulugumuzun degerli destekçileri</p>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">Sponsorlarımız</h2>
+                <p className="text-muted-foreground">Topluluğumuzun değerli destekçileri</p>
               </div>
               <SponsorGrid sponsors={activeSponsors} />
             </div>
@@ -510,12 +510,12 @@ export default async function HomePage() {
               <Card className="bg-primary text-primary-foreground animate-scale-in hover:shadow-2xl transition-all duration-300">
                 <CardContent className="py-12 text-center">
                   <Star className="h-12 w-12 mx-auto mb-6 animate-bounce-subtle" />
-                  <h2 className="text-3xl font-bold mb-4">Topluluga Katil</h2>
+                  <h2 className="text-3xl font-bold mb-4">Topluluğa Katıl</h2>
                   <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-                    Hemen kaydol, etkinliklere katil, blog yaz, puan kazan ve rozetleri topla!
+                    Hemen kaydol, etkinliklere katıl, blog yaz, puan kazan ve rozetleri topla!
                   </p>
                   <Button size="lg" variant="secondary" asChild className="hover:scale-110 transition-transform">
-                    <Link href="/kayit">Ucretsiz Kayit Ol</Link>
+                    <Link href="/kayit">Ücretsiz Kayıt Ol</Link>
                   </Button>
                 </CardContent>
               </Card>

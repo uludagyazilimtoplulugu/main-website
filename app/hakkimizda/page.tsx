@@ -2,7 +2,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { auth } from "@/lib/auth"
 import { Card, CardContent } from "@/components/ui/card"
-import { Users, Target, Heart, Lightbulb, Github, Linkedin, Mail } from "lucide-react"
+import { Users, Target, Heart, Lightbulb } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -50,7 +50,7 @@ export default async function AboutPage() {
                 <p className="text-muted-foreground leading-relaxed">
                   Uludağ Yazılım Topluluğu, 2020 yılında Bursa Uludağ Üniversitesi öğrencilerinin yazılım ve teknoloji
                   alanındaki tutkularını paylaşmak, birlikte öğrenmek ve projeler geliştirmek amacıyla kurulmuştur.
-                  Kuruluşumuzdan bu yana 50'den fazla etkinlik düzenledik, 100'den fazla blog yazısı yayınladık ve
+                  Kuruluşumuzdan bu yana 50&apos;den fazla etkinlik düzenledik, 10&apos;dan fazla blog yazısı yayınladık ve
                   yüzlerce öğrenciye kariyer yolculuklarında rehberlik ettik.
                 </p>
               </CardContent>
@@ -73,7 +73,7 @@ export default async function AboutPage() {
                 <Lightbulb className="h-10 w-10 text-primary mb-4" />
                 <h2 className="text-2xl font-bold mb-3">Vizyonumuz</h2>
                 <p className="text-muted-foreground">
-                  Türkiye'nin en aktif ve etkili üniversite yazılım topluluklarından biri olmak. Mezunlarımızın
+                  Türkiye&apos;nin en aktif ve etkili üniversite yazılım topluluklarından biri olmak. Mezunlarımızın
                   teknoloji sektöründe başarılı kariyerler yapmasına katkıda bulunmak.
                 </p>
               </CardContent>
@@ -91,7 +91,7 @@ export default async function AboutPage() {
                 <p className="text-sm text-muted-foreground">Bilgiyi, deneyimi ve kaynakları özgürce paylaşmak</p>
               </div>
               <div>
-                <h3 className="font-semibold mb-2 text-foreground">İşbirliği</h3>
+                <h3 className="font-semibold mb-2 text-foreground">İş Birliği</h3>
                 <p className="text-sm text-muted-foreground">Birlikte çalışarak daha güçlü olmak</p>
               </div>
               <div>
@@ -116,108 +116,11 @@ export default async function AboutPage() {
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-bold mb-4">Yönetim Ekibi</h2>
             <p className="text-muted-foreground mb-6">
-              Toplulugumuzun yönetim kadrosunu ve gecmis dönem yöneticilerini görüntüleyin.
+              Topluluğumuzun yönetim kadrosunu ve geçmiş dönem yöneticilerini görüntüleyin.
             </p>
             <Button size="lg" variant="outline" asChild>
               <Link href="/yonetim-kurulu">Yönetim Kurulunu Görüntüle</Link>
             </Button>
-          </div>
-
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-center">Web Sitesi Geliştiricileri</h2>
-            <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
-              <CardContent className="pt-8">
-                <p className="text-center text-muted-foreground mb-8">
-                  Bu projeyi hayata geçiren yetenekli geliştirici ekibimiz
-                </p>
-                <div className="grid gap-6 md:grid-cols-3">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="text-center mb-4">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Users className="h-8 w-8 text-primary" />
-                        </div>
-                        <h3 className="font-bold text-lg">Zeynep Şahin</h3>
-                        <p className="text-sm text-muted-foreground">Frontend Developer</p>
-                      </div>
-                      <div className="flex justify-center gap-3">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="https://linkedin.com" target="_blank">
-                            <Linkedin className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="https://github.com" target="_blank">
-                            <Github className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="mailto:zeynep@example.com">
-                            <Mail className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="text-center mb-4">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Users className="h-8 w-8 text-primary" />
-                        </div>
-                        <h3 className="font-bold text-lg">Can Özdemir</h3>
-                        <p className="text-sm text-muted-foreground">Backend Developer</p>
-                      </div>
-                      <div className="flex justify-center gap-3">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="https://linkedin.com" target="_blank">
-                            <Linkedin className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="https://github.com" target="_blank">
-                            <Github className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="mailto:can@example.com">
-                            <Mail className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="text-center mb-4">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Users className="h-8 w-8 text-primary" />
-                        </div>
-                        <h3 className="font-bold text-lg">Elif Yıldız</h3>
-                        <p className="text-sm text-muted-foreground">UI/UX Designer</p>
-                      </div>
-                      <div className="flex justify-center gap-3">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="https://linkedin.com" target="_blank">
-                            <Linkedin className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="https://github.com" target="_blank">
-                            <Github className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href="mailto:elif@example.com">
-                            <Mail className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           <div className="text-center">
